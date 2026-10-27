@@ -1,4 +1,6 @@
-# warpbox — Cloudflare WARP in a Docker container (macOS)
+# warpbox — Cloudflare WARP in a Docker container (macOS, Ubuntu)
+
+> This README covers macOS. On Ubuntu, follow [docs/ubuntu.md](docs/ubuntu.md).
 
 Run a Cloudflare Zero Trust (WARP) client inside a small Docker container instead of on the Mac.
 The WARP client then sees only the container — not your Mac's apps, Wi-Fi details or battery — and

@@ -8,7 +8,7 @@
 #   warpbox token '<link>'  finish enrollment with the com.cloudflare.warp://… link from the browser
 #   warpbox run <cmd…>      run one command with ALL_PROXY through warpbox (curl, scripts)
 #   warpbox env             print proxy exports (eval "$(warpbox env)")
-#   warpbox pac on|off      macOS auto-proxy (PAC): only PAC_DOMAINS / PAC_IPS from .env via warpbox
+#   warpbox pac on|off      system auto-proxy (PAC; macOS or GNOME): only PAC_DOMAINS / PAC_IPS from .env via warpbox
 #   warpbox logs | shell
 
 set -euo pipefail
@@ -59,11 +59,23 @@ case "${1:-}" in
         echo "export ALL_PROXY=$PROXY all_proxy=$PROXY HTTPS_PROXY=$PROXY HTTP_PROXY=$PROXY"
         ;;
     pac)
-        case "${2:-}" in
-            on)  networksetup -setautoproxyurl "$NET_SERVICE" "$PAC_URL" && networksetup -setautoproxystate "$NET_SERVICE" on ;;
-            off) networksetup -setautoproxystate "$NET_SERVICE" off ;;
-            *)   networksetup -getautoproxyurl "$NET_SERVICE" ;;
-        esac
+        if [[ "$(uname -s)" == "Darwin" ]]; then
+            case "${2:-}" in
+                on)  networksetup -setautoproxyurl "$NET_SERVICE" "$PAC_URL" && networksetup -setautoproxystate "$NET_SERVICE" on ;;
+                off) networksetup -setautoproxystate "$NET_SERVICE" off ;;
+                *)   networksetup -getautoproxyurl "$NET_SERVICE" ;;
+            esac
+        elif command -v gsettings >/dev/null 2>&1; then
+            # Ubuntu / GNOME system proxy (used by Chrome/Chromium; Firefox: "Use system proxy settings")
+            case "${2:-}" in
+                on)  gsettings set org.gnome.system.proxy autoconfig-url "$PAC_URL" && gsettings set org.gnome.system.proxy mode 'auto' ;;
+                off) gsettings set org.gnome.system.proxy mode 'none' ;;
+                *)   echo "mode: $(gsettings get org.gnome.system.proxy mode)  url: $(gsettings get org.gnome.system.proxy autoconfig-url)" ;;
+            esac
+        else
+            echo "No system proxy tool found — set the browser's automatic proxy URL to $PAC_URL by hand."
+            exit 1
+        fi
         ;;
     logs)  docker exec warpbox tail -n 100 -f /var/log/warp-svc.log ;;
     shell) docker exec -it warpbox bash ;;
