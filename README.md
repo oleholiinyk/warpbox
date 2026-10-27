@@ -42,7 +42,8 @@ reject it.
    cp .env.example .env
    ```
    Set `WARP_ORG` (your Zero Trust team name), `PAC_DOMAINS` (domain suffixes that should go
-   through warpbox) and optionally `PAC_IPS`.
+   through warpbox) and optionally `PAC_IPS`. `PAC_RULES` sends specific hosts elsewhere, e.g. to
+   another local proxy: `PAC_RULES="vpn-only.example.com=PROXY 127.0.0.1:1090"` (quote it).
 
 2. **Make `warpbox` a plain command** (run inside the warpbox folder):
    ```bash

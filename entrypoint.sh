@@ -19,9 +19,13 @@ XML
 # When warpbox is down the PAC URL is unreachable and browsers go DIRECT.
 mkdir -p /pac
 to_js_array() { local IFS=,; local out=""; for v in $1; do v="${v// /}"; [[ -n "$v" ]] && out+="\"$v\","; done; echo "[${out%,}]"; }
+# PAC_RULES: extra exact-host rules, "host=PROXY SPEC;host2=PROXY SPEC" (checked first)
+to_js_rules() { local IFS=';'; local out=""; for r in $1; do [[ "$r" == *=* ]] || continue; out+="\"${r%%=*}\":\"${r#*=}\","; done; echo "{${out%,}}"; }
 cat > /pac/proxy.pac <<PAC
 function FindProxyForURL(url, host) {
     var viaWarp = "SOCKS5 127.0.0.1:1080; SOCKS 127.0.0.1:1080";
+    var rules = $(to_js_rules "${PAC_RULES:-}");
+    if (rules.hasOwnProperty(host)) return rules[host];
     var domains = $(to_js_array "${PAC_DOMAINS:-}");
     var ips = $(to_js_array "${PAC_IPS:-}");
     for (var i = 0; i < domains.length; i++)
