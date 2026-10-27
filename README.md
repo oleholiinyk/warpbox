@@ -42,12 +42,13 @@ reject it.
    Set `WARP_ORG` (your Zero Trust team name), `PAC_DOMAINS` (domain suffixes that should go
    through warpbox) and optionally `PAC_IPS`.
 
-2. **Optional — make `warpbox` a plain command:**
+2. **Make `warpbox` a plain command** (run inside the warpbox folder):
    ```bash
    mkdir -p ~/.local/bin && ln -sf "$PWD/warpbox" ~/.local/bin/warpbox
-   # and in ~/.zshrc:
-   export PATH="$HOME/.local/bin:$PATH"
+   echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+   source ~/.zshrc
    ```
+   Skip it and use the full path instead (`/path/to/warpbox/warpbox status`) if you prefer.
 
 3. **Start:**
    ```bash
@@ -79,6 +80,20 @@ reject it.
    Host my-internal-host
        ProxyCommand nc -X 5 -x 127.0.0.1:1080 %h %p
    ```
+
+## Daily routine
+
+**Start of day**
+1. Make sure Docker Desktop is running (whale icon in the menu bar).
+2. `warpbox up`
+3. Work as usual — internal sites open in the browser, `ssh` to configured hosts works.
+
+**End of day**
+```bash
+warpbox down
+```
+Nothing runs and nothing is reported until the next `warpbox up`. Internal sites stop loading;
+everything else is unaffected.
 
 ## Usage
 
@@ -112,6 +127,7 @@ don't load.
 | `ssh` hangs | warpbox is down, or the host has no `ProxyCommand` |
 | `Registration Missing` | `data/` was removed — enroll again (setup step 4) |
 | `set WARP_ORG in …/.env` | Create `.env` from `.env.example` |
+| `zsh: command not found: warpbox` | `~/.local/bin` is not in your PATH — do setup step 2, or use the full path to the `warpbox` script |
 
 Quick check:
 ```bash
