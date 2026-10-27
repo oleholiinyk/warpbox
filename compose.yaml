@@ -1,0 +1,19 @@
+services:
+  warpbox:
+    build: .
+    image: warpbox:local
+    container_name: warpbox
+    hostname: warpbox
+    cap_add: [NET_ADMIN]
+    devices: ["/dev/net/tun:/dev/net/tun"]
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: "0"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data:/var/lib/cloudflare-warp
+    ports:
+      - "127.0.0.1:1080:1080"
+      - "127.0.0.1:1081:1081"
+    restart: "no"

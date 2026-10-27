@@ -1,0 +1,8 @@
+# WARP device registration — this is your login for the device, never commit it
+data/
+# Local settings (org name, internal domains/IPs)
+.env
+# Private notes
+NOTES.md
+# IDE
+.idea/
